@@ -511,32 +511,32 @@ def main():
     )
     doc.add_paragraph(
         "**1. Putative Jasmonic Acid (JA) Biosynthesis and Signaling Homologs:**\n"
-        "We observed a significant differential regulation of genes mapping to the JA-biosynthetic pathway. "
-        "These include putative homologs of lipoxygenases (e.g. *LOX2*, *LOX3*, *LOX4*), allene oxide synthase (*AOS*), "
-        "and allene oxide cyclase (*AOC1*, *AOC2*). Downstream, putative Arabidopsis-annotated homologs of the master "
-        "transcription factor *MYC2* and the jasmonate receptor *COI1* showed significant upregulation under infestation, "
-        "while several jasmonate ZIM-domain (*JAZ1*, *JAZ3*, *JAZ10*) repressor-like genes were induced, suggesting "
-        "an active response loop. However, some individual genes (such as *AOS*) did not resolve in our homology mapping, "
+        "Rather than a uniform activation, we observed a time-dependent modulation of JA signaling components. "
+        "Putative homologs of lipoxygenases (*LOX4*), allene oxide cyclase (*AOC1*), and jasmonate ZIM-domain (*JAZ1*) repressor-like genes were differentially regulated. "
+        "The master transcription factor *MYC2* was not significantly regulated at early stages (6h, padj = 0.18), indicating a delayed induction of *MYC2* (significant at 12h and 24h). "
+        "The repressor *JAZ1* showed highly dynamic regulatory behavior (downregulated at 6h and 24h, but transiently upregulated at 12h), reflecting complex negative-feedback loops "
+        "rather than simple pathway activation. However, some individual genes (such as *AOS*) did not resolve in our homology mapping, "
         "requiring caution in interpreting the completeness of the pathway.", style='List Bullet'
     )
     doc.add_paragraph(
         "**2. Putative Salicylic Acid (SA) Signaling Homologs:**\n"
-        "Although SA generally mediates biotrophic pathogen defense, we detected cross-talk. Putative homologs "
-        "of systemic acquired resistance deficient 1 (*SARD1*) and the SA-responsive transcription factor *TGA3* showed "
-        "transcriptional changes. Pathogenesis-related protein 1 (*PR1*) was not mapped to any G. uralensis gene under "
-        "our homology constraints, indicating that SA marker genes are either absent or divergent in this legume species.", style='List Bullet'
+        "Although SA generally mediates biotrophic pathogen defense, we detected limited evidence of salicylic acid–associated transcriptional modulation. "
+        "Putative homologs of systemic acquired resistance deficient 1 (*SARD1*) showed a mixed regulatory pattern, and the transcription factor *TGA3* showed "
+        "weak, non-significant modulation at early stages (padj = 0.66 at 6h). Pathogenesis-related protein 1 (*PR1*) was not mapped to any G. uralensis gene under "
+        "our homology constraints, and *NPR1* lacked available statistical adjusted p-values due to low-count variance, suggesting that classical SA-marker genes "
+        "are not strongly active under chewing insect stress in this legume species.", style='List Bullet'
     )
     doc.add_paragraph(
         "**3. Phenylpropanoid and Flavonoid Biosynthesis Homologs:**\n"
-        "A complete activation of secondary metabolism was observed. Key putative enzymes feeding into flavonoid production were heavily induced, "
+        "A significant upregulation of genes associated with secondary metabolism was observed. Key putative enzymes feeding into flavonoid production were induced, "
         "including phenylalanine ammonia-lyase (*PAL1*, *PAL2*), cinnamate 4-hydroxylase (*C4H*), 4-coumarate-CoA ligase (*4CL1*), "
-        "chalcone synthase (*CHS*), and chalcone isomerase (*CHI*). Dihydroflavonol 4-reductase (*DFR*) did not map, suggesting alternative "
-        "isoforms or annotations for downstream steps in this medicinal plant.", style='List Bullet'
+        "chalcone synthase (*CHS*), and chalcone isomerase (*CHI*). Since metabolite profiling (such as LC-MS) was not performed in this study, the upregulation of genes associated with "
+        "liquiritin biosynthesis suggests a potential accumulation of active defense flavonoids rather than confirming direct metabolite levels.", style='List Bullet'
     )
     doc.add_paragraph(
         "**4. ROS Scavenging Systems:**\n"
         "Superoxide dismutase (SOD), catalase (CAT), peroxidases (PRX), and glutathione S-transferases (GSTs) were significantly "
-        "upregulated, showing active mitigation of herbivore-induced reactive oxygen species (ROS) and cellular damage.", style='List Bullet'
+        "upregulated, suggesting active mitigation of herbivore-induced reactive oxygen species (ROS) and cellular damage.", style='List Bullet'
     )
     
     doc.add_paragraph(
@@ -717,21 +717,21 @@ def main():
         "To summarize the molecular mechanism of the licorice defense response, the following pathway is proposed based on our findings:"
     )
     doc.add_paragraph(
-        "1. **Herbivore Chewing / Wounding:** Triggers localized cell damage, releasing oligogalacturonides and cellular signals.\n"
-        "2. **Early Signaling (MAPK & Ca2+):** Calcium influx and MAPK cascade activation transduce stress signals into the nucleus.\n"
-        "3. **Phytohormone Induction (JA/ET):** Upregulation of LOX, AOS, and AOC leads to JA accumulation, which degrades JAZ repressors via the SCF-COI1 complex.\n"
-        "4. **Transcription Factor Activation:** Relieved repression allows MYC2, WRKYs, and AP2/ERF TFs to bind to promoters of defense genes.\n"
-        "5. **Defense Outputs:** Upregulation of PAL, CHS, and CHI leads to active accumulation of defensive flavonoids (liquiritin). Simultaneously, peroxidases and GSTs protect cells from ROS damage."
+        "1. **Herbivore Chewing / Wounding:** Is associated with localized cell damage, releasing cellular signals.\n"
+        "2. **Early Signaling (MAPK & Ca2+):** Calcium changes and MAPK cascade activation coincide with stress signal transduction toward the nucleus.\n"
+        "3. **Phytohormone Modulation (JA/ET):** Transcriptional modulation of LOX, AOS, and AOC is associated with jasmonate signaling, which coincides with the degradation of JAZ repressors.\n"
+        "4. **Transcription Factor Activation:** Putative relief of repression is associated with MYC2, WRKYs, and AP2/ERF TFs, contributing to binding at promoters of defense genes.\n"
+        "5. **Potential Defense Outputs:** Upregulation of PAL, CHS, and CHI suggests potential accumulation of defensive flavonoids (such as liquiritin). Simultaneously, peroxidases and GSTs contribute to protecting cells from oxidative stress."
     )
     
     # Embed the biological model summary figure
     add_figure("biological_model_summary.png", 
                "Biological Model of Licorice Defense Response to Herbivory", 
                "Proposed model of G. uralensis response to chewing insect herbivory based on differential expression and pathway analysis. "
-               "Wounding and oral secretions trigger early MAPK and calcium signaling within 6 hours. This signaling promotes phytohormone accumulation "
-               "(primarily jasmonic acid), which degrades JAZ repressors and activates transcription factors (WRKY, MYC2) at 12 hours. "
-               "By 24 hours, this transcription program drives chemical defenses (upregulated flavonoid and phenylpropanoid biosynthesis) "
-               "and protective ROS scavenging, while growth-associated photosynthesis is repressed to conserve energetic resources.", width=5.5)
+               "Wounding and oral secretions are associated with early MAPK and calcium signaling within 6 hours. This signaling coincides with phytohormone modulation, "
+               "which is associated with the degradation of JAZ repressors and the activation of transcription factors (WRKY, MYC2) at 12 hours. "
+               "By 24 hours, this transcription program contributes to chemical defenses (upregulated flavonoid and phenylpropanoid biosynthesis genes suggesting "
+               "potential metabolite accumulation) and protective ROS scavenging, while growth-associated photosynthesis genes are repressed to conserve energetic resources.", width=5.5)
     
     # --- SECTION 8: CONCLUSION ---
     h1 = doc.add_heading("8. Conclusion", level=1)
