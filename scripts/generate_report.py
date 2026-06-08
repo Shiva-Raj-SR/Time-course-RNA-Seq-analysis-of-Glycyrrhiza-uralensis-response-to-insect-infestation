@@ -54,9 +54,6 @@ def main():
     run = author_p.add_run("Computational Biologist & Bioinformatician\n")
     run.font.name = 'Arial'
     run.font.size = Pt(11)
-    run = author_p.add_run("IISER Tirupati Alumni\n\n")
-    run.font.name = 'Arial'
-    run.font.size = Pt(11)
     run = author_p.add_run("Date: June 2026")
     run.font.name = 'Arial'
     run.font.size = Pt(11)
@@ -217,7 +214,23 @@ def main():
         
         fig_counter += 1
         doc.add_paragraph()
-    
+        
+    def parse_go_kegg_filename(filename):
+        match = re.search(r"(go_BP|go_MF|go_CC|kegg)_dotplot_(.*)_(up|down|all)\.png", filename)
+        if match:
+            category_code = match.group(1)
+            comp = match.group(2).replace("_", " ")
+            direction = match.group(3).upper()
+            category_map = {
+                "go_BP": "GO Biological Process",
+                "go_MF": "GO Molecular Function",
+                "go_CC": "GO Cellular Component",
+                "kegg": "KEGG Pathway"
+            }
+            category_name = category_map.get(category_code, category_code)
+            return category_name, comp, direction
+        return "Functional Enrichment", "comparison", "ALL"
+
     # Add QC and Heatmaps
     doc.add_heading("3.1 Sample Clustering & Quality Control Validation", level=2)
     doc.add_paragraph(
@@ -325,76 +338,102 @@ def main():
     h2 = doc.add_heading("4.2 Timepoint Pathway Comparisons (Common vs Unique)", level=2)
     h2.runs[0].font.color.rgb = teal_color
     doc.add_paragraph(
-        "Comparing the time points reveals a distinct transcriptomic trajectory:\n"
+        "Comparing the time points suggests a progressive response trajectory:\n"
         "•  **Common Core (All Timepoints):** Ribosome biogenesis (`ath03010`) and Flavonoid biosynthesis (`ath00941`) are induced across 6h, 12h, and 24h, forming the continuous backbone of licorice chemical defense.\n"
         "•  **Early Unique (6h):** MAPK signaling pathway (`ath04016`) and calcium-dependent signaling are uniquely enriched, representing early sensing of oral secretions and mechanical wounding.\n"
         "•  **Mid Unique (12h):** Peak enrichment of DNA-binding transcription factors (WRKY and AP2/ERF families) and jasmonate-responsive signaling proteins.\n"
         "•  **Late Unique (24h):** Broad metabolic shifts, including fatty acid biosynthesis (`ath00061`), carbon metabolism (`ath01200`), and secondary cell-wall reinforcement (lignin precursor phenylpropanoids)."
     )
     
-    def parse_go_kegg_filename(filename):
-        match = re.search(r"(go_BP|go_MF|go_CC|kegg)_dotplot_(.*)_(up|down|all)\.png", filename)
-        if match:
-            category_code = match.group(1)
-            comp = match.group(2).replace("_", " ")
-            direction = match.group(3).upper()
-            category_map = {
-                "go_BP": "GO Biological Process",
-                "go_MF": "GO Molecular Function",
-                "go_CC": "GO Cellular Component",
-                "kegg": "KEGG Pathway"
-            }
-            category_name = category_map.get(category_code, category_code)
-            return category_name, comp, direction
-        return "Functional Enrichment", "comparison", "ALL"
+    # 2x2 Grid function for dotplots
+    def add_image_grid(plots, category_name):
+        nonlocal fig_counter
+        i = 0
+        fig_num = fig_counter
+        while i < len(plots):
+            chunk = plots[i:i+4]
+            grid_table = doc.add_table(rows=2, cols=2)
+            grid_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+            grid_table.style = 'Normal Table'
+            
+            # Set equal column widths
+            for row in grid_table.rows:
+                row.cells[0].width = Inches(3.25)
+                row.cells[1].width = Inches(3.25)
+                
+            for idx, filename in enumerate(chunk):
+                row_idx = idx // 2
+                col_idx = idx % 2
+                cell = grid_table.rows[row_idx].cells[col_idx]
+                
+                path = os.path.join(results_dir, filename)
+                if os.path.exists(path):
+                    p_img = cell.paragraphs[0]
+                    p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    p_img.add_run().add_picture(path, width=Inches(2.9))
+                    
+                    cat_code, comp, direction = parse_go_kegg_filename(filename)
+                    
+                    # Generate specific biological text based on category, direction, and timepoint
+                    if "kegg" in filename.lower():
+                        if direction == "UP":
+                            desc = f"Upregulated KEGG enrichment for {comp} showing active chemical defense (flavonoid biosynthesis) and increased translational capacity (ribosomes)."
+                        elif direction == "DOWN":
+                            desc = f"Downregulated KEGG enrichment for {comp} illustrating metabolic repression of growth-associated processes (photosynthesis, lipid precursors)."
+                        else:
+                            desc = f"Global KEGG enrichment for {comp} representing a systems-level overview of defense activation and growth suppression trade-offs."
+                    else:
+                        if direction == "UP":
+                            desc = f"Upregulated {category_name} terms in {comp} reflecting kinase-mediated defense signaling and active secondary metabolism."
+                        elif direction == "DOWN":
+                            desc = f"Downregulated {category_name} terms in {comp} reflecting repression of chloroplast machinery and cell elongation."
+                        else:
+                            desc = f"Overall {category_name} terms in {comp} reflecting global cellular adjustments."
+                            
+                    p_cap = cell.add_paragraph()
+                    p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    p_cap.paragraph_format.space_before = Pt(3)
+                    p_cap.paragraph_format.space_after = Pt(1)
+                    run_cap = p_cap.add_run(f"Figure {fig_num}: {category_name} - {comp} ({direction})")
+                    run_cap.font.size = Pt(8.5)
+                    run_cap.font.bold = True
+                    run_cap.font.italic = True
+                    
+                    p_desc = cell.add_paragraph()
+                    p_desc.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    p_desc.paragraph_format.space_before = Pt(0)
+                    p_desc.paragraph_format.space_after = Pt(4)
+                    run_desc = p_desc.add_run(desc)
+                    run_desc.font.size = Pt(8.0)
+                    
+                fig_num += 1
+            
+            doc.add_page_break()
+            i += 4
+        fig_counter = fig_num
     
-    # Add GO Biological Process
+    # Add GO Biological Process in 2x2 grid
     doc.add_heading("4.3 Gene Ontology: Biological Process (BP) Dotplots", level=2)
-    doc.add_paragraph("GO Biological Process enrichment dotplots show the major cellular pathways activated or repressed at each timepoint:")
-    for f in go_bp_plots:
-        cat_name, comp, direction = parse_go_kegg_filename(f)
-        add_figure(f, f"GO Biological Process Enrichment for {comp} ({direction} DEGs)", 
-                   f"GO Biological Process enrichment dotplot identifying significant overrepresentation of defense-related processes "
-                   f"among {direction}regulated genes in {comp} (BH-adjusted p-value < 0.05, q-value < 0.05). Enriched terms reflect metabolic shifts "
-                   f"from primary growth to active defense (e.g., cell wall reinforcement and response to jasmonic acid).", width=4.5)
-        
-    doc.add_page_break()
+    doc.add_paragraph("GO Biological Process enrichment dotplots show the major cellular pathways activated or repressed at each timepoint (FDR < 0.05):")
+    add_image_grid(go_bp_plots, "GO Biological Process")
     
-    # Add GO Molecular Function
+    # Add GO Molecular Function in 2x2 grid
     doc.add_heading("4.4 Gene Ontology: Molecular Function (MF) Dotplots", level=2)
-    doc.add_paragraph("GO Molecular Function enrichment dotplots identify the biochemical activities of the regulated genes:")
-    for f in go_mf_plots:
-        cat_name, comp, direction = parse_go_kegg_filename(f)
-        add_figure(f, f"GO Molecular Function Enrichment for {comp} ({direction} DEGs)", 
-                   f"GO Molecular Function enrichment dotplot identifying significant overrepresentation of biochemical activities "
-                   f"among {direction}regulated genes in {comp} (BH-adjusted p-value < 0.05, q-value < 0.05). High enrichment of transcription factor "
-                   f"binding and kinase activity suggests active transduction of defense signaling cascades.", width=4.5)
-        
-    doc.add_page_break()
+    doc.add_paragraph("GO Molecular Function enrichment dotplots identify the biochemical activities of the regulated genes (FDR < 0.05):")
+    add_image_grid(go_mf_plots, "GO Molecular Function")
     
-    # Add GO Cellular Component
+    # Add GO Cellular Component in 2x2 grid
     doc.add_heading("4.5 Gene Ontology: Cellular Component (CC) Dotplots", level=2)
-    doc.add_paragraph("GO Cellular Component enrichment dotplots display where the active gene products localize in the cell:")
-    for f in go_cc_plots:
-        cat_name, comp, direction = parse_go_kegg_filename(f)
-        add_figure(f, f"GO Cellular Component Enrichment for {comp} ({direction} DEGs)", 
-                   f"GO Cellular Component enrichment dotplot showing subcellular localizations "
-                   f"for {direction}regulated genes in {comp} (BH-adjusted p-value < 0.05, q-value < 0.05). The enrichment of ribosome and cytosol "
-                   f"components in upregulated genes matches the high translational demand for defense protein synthesis.", width=4.5)
-        
-    doc.add_page_break()
+    doc.add_paragraph("GO Cellular Component enrichment dotplots display where the active gene products localize in the cell (FDR < 0.05):")
+    add_image_grid(go_cc_plots, "GO Cellular Component")
     
-    # Add KEGG Pathways
+    # Add KEGG Pathways in 2x2 grid (4 images per page)
     doc.add_heading("4.6 KEGG Pathway Enrichment Dotplots", level=2)
-    doc.add_paragraph("KEGG pathway enrichment dotplots illustrate the metabolic networks and biochemical pathways regulated during infestation:")
-    for f in kegg_plots:
-        cat_name, comp, direction = parse_go_kegg_filename(f)
-        add_figure(f, f"KEGG Pathway Enrichment for {comp} ({direction} DEGs)", 
-                   f"KEGG pathway enrichment dotplot showing significantly overrepresented pathways "
-                   f"for {direction}regulated genes in {comp} (BH-adjusted p-value < 0.05, q-value < 0.05). Pathways like flavonoid biosynthesis "
-                   f"and ribosome translation are heavily induced, while photosynthesis and growth-associated fatty acid metabolism are repressed.", width=4.5)
-        
-    doc.add_page_break()
+    doc.add_paragraph(
+        "KEGG pathway enrichment dotplots illustrate the metabolic networks and biochemical pathways regulated during infestation. "
+        "Figures are arranged in a 2x2 grid on each page to allow comparative visual analysis (FDR < 0.05):"
+    )
+    add_image_grid(kegg_plots, "KEGG Pathway")
     
     # --- SECTION 5: DEFENSE GENES & SPECIES SPECIFICITY ---
     h1 = doc.add_heading("5. Defense Gene Profiling & Targeted Pathway Analysis", level=1)
@@ -403,26 +442,31 @@ def main():
     
     doc.add_paragraph(
         "To move beyond generic descriptions, we mapped our DEGs to specific pathways of plant defense, using the high-confidence "
-        "Arabidopsis homologs as annotation proxies. This targeted analysis revealed specific regulation in the following pathways:"
+        "Arabidopsis homologs as annotation proxies. This targeted analysis suggests specific regulation in the following pathways:"
     )
     doc.add_paragraph(
-        "**1. Jasmonic Acid (JA) Biosynthesis and Signaling:**\n"
-        "We observed a major induction of the JA-biosynthetic pathway, including lipoxygenases (LOX2, LOX3, LOX4), allene oxide synthase (AOS), "
-        "and allene oxide cyclase (AOC1, AOC2). Downstream, the master transcription factor MYC2 was strongly upregulated, "
-        "while jasmonate ZIM-domain (JAZ1, JAZ3, JAZ10) repressor genes were induced as part of a negative-feedback homeostasis loop.", style='List Bullet'
+        "**1. Putative Jasmonic Acid (JA) Biosynthesis and Signaling Homologs:**\n"
+        "We observed a significant differential regulation of genes mapping to the JA-biosynthetic pathway. "
+        "These include putative homologs of lipoxygenases (e.g. *LOX2*, *LOX3*, *LOX4*), allene oxide synthase (*AOS*), "
+        "and allene oxide cyclase (*AOC1*, *AOC2*). Downstream, putative Arabidopsis-annotated homologs of the master "
+        "transcription factor *MYC2* and the jasmonate receptor *COI1* showed significant upregulation under infestation, "
+        "while several jasmonate ZIM-domain (*JAZ1*, *JAZ3*, *JAZ10*) repressor-like genes were induced, suggesting "
+        "an active response loop. However, some individual genes (such as *AOS*) did not resolve in our homology mapping, "
+        "requiring caution in interpreting the completeness of the pathway.", style='List Bullet'
     )
     doc.add_paragraph(
-        "**2. Salicylic Acid (SA) Signaling:**\n"
-        "Although SA generally regulates biotrophic pathogen defense, we detected significant cross-talk, with systemic acquired resistance "
-        "deficient 1 (SARD1), pathogen-induced transcription factor TGA3, and pathogenesis-related protein 1 (PR1) showing upregulation, "
-        "illustrating SA-JA antagonism or synergistic defense tuning.", style='List Bullet'
+        "**2. Putative Salicylic Acid (SA) Signaling Homologs:**\n"
+        "Although SA generally mediates biotrophic pathogen defense, we detected cross-talk. Putative homologs "
+        "of systemic acquired resistance deficient 1 (*SARD1*) and the SA-responsive transcription factor *TGA3* showed "
+        "transcriptional changes. Pathogenesis-related protein 1 (*PR1*) was not mapped to any G. uralensis gene under "
+        "our homology constraints, indicating that SA marker genes are either absent or divergent in this legume species.", style='List Bullet'
     )
     doc.add_paragraph(
-        "**3. Phenylpropanoid and Flavonoid Biosynthesis:**\n"
-        "A complete activation of secondary metabolism was observed. Key enzymes feeding into flavonoid production were heavily induced, "
-        "including phenylalanine ammonia-lyase (PAL1, PAL2), cinnamate 4-hydroxylase (C4H), 4-coumarate-CoA ligase (4CL1), "
-        "chalcone synthase (CHS), chalcone isomerase (CHI), and dihydroflavonol 4-reductase (DFR). This highlights the active "
-        "production of liquiritin and related defense flavonoids in licorice leaves.", style='List Bullet'
+        "**3. Phenylpropanoid and Flavonoid Biosynthesis Homologs:**\n"
+        "A complete activation of secondary metabolism was observed. Key putative enzymes feeding into flavonoid production were heavily induced, "
+        "including phenylalanine ammonia-lyase (*PAL1*, *PAL2*), cinnamate 4-hydroxylase (*C4H*), 4-coumarate-CoA ligase (*4CL1*), "
+        "chalcone synthase (*CHS*), and chalcone isomerase (*CHI*). Dihydroflavonol 4-reductase (*DFR*) did not map, suggesting alternative "
+        "isoforms or annotations for downstream steps in this medicinal plant.", style='List Bullet'
     )
     doc.add_paragraph(
         "**4. ROS Scavenging Systems:**\n"
@@ -435,11 +479,17 @@ def main():
         "normalized by showing their percentage representation relative to the total DEGs at each timepoint:"
     )
     
-    # Add table 1
+    # Add Table 1
     table1 = doc.add_table(rows=12, cols=4)
     table1.alignment = WD_TABLE_ALIGNMENT.CENTER
     table1.style = 'Table Grid'
     
+    # Set Column Widths for Table 1
+    col_widths1 = [Inches(2.5), Inches(1.3), Inches(1.3), Inches(1.3)]
+    for row in table1.rows:
+        for idx, width in enumerate(col_widths1):
+            row.cells[idx].width = width
+            
     # Header styling
     hdr_cells = table1.rows[0].cells
     hdr_cells[0].text = 'Functional Group / Class'
@@ -451,7 +501,6 @@ def main():
         cell.paragraphs[0].runs[0].font.bold = True
         cell.paragraphs[0].runs[0].font.color.rgb = teal_color
         
-    # Data formatted with counts and percentages (Count / Total DEGs * 100)
     data1 = [
         ("Transcription Factor: WRKY", "132 (1.53%)", "99 (1.27%)", "120 (1.22%)"),
         ("Transcription Factor: AP2/ERF", "119 (1.38%)", "87 (1.11%)", "103 (1.05%)"),
@@ -476,10 +525,31 @@ def main():
     doc.add_paragraph("\nTable 1: Gene counts and percentage of total DEGs for major regulatory and defense classes during insect infestation.")
     
     doc.add_paragraph(
-        "\nTo further detail these expression dynamics, the table below lists the log2(Fold Change) and adjusted p-value "
+        "\nTo further detail these expression dynamics, the table below lists the log2(Fold Change) and BH-adjusted p-value (padj) "
         "for specific key representative genes involved in the phenylpropanoid pathway, flavonoid biosynthesis, and jasmonic/salicylic acid signaling. "
-        "These represent mapped homologs present in the G. uralensis genome:"
+        "This explicit reporting provides exact statistics for target orthologs:"
     )
+
+    # Formatter functions for clean Table 2 representation
+    def format_padj(val_str):
+        if val_str == "N/A" or not val_str:
+            return "N/A*"
+        try:
+            val = float(val_str)
+            if val == 1.0 or val == 0.0:
+                return f"{val:.1f}"
+            return f"{val:.2e}"
+        except ValueError:
+            return "N/A*"
+
+    def format_lfc(val_str):
+        if val_str == "N/A" or not val_str:
+            return "N/A"
+        try:
+            val = float(val_str)
+            return f"{val:+.2f}"
+        except ValueError:
+            return "N/A"
 
     # Add Table 2: Representative Genes
     table2_csv_path = "results/table2_representative_defense_genes.csv"
@@ -492,20 +562,26 @@ def main():
                 if row:
                     table2_rows.append(row)
         
-        # Create Word Table: Col 1: Symbol, Col 2: GWH Locus, Col 3: Class, Col 4: 6H LFC (padj), Col 5: 12H LFC (padj), Col 6: 24H LFC (padj)
+        # Create Word Table: Col 1: Symbol, Col 2: GWH Locus, Col 3: Class, Col 4: 6H, Col 5: 12H, Col 6: 24H
         table2 = doc.add_table(rows=len(table2_rows) + 1, cols=6)
         table2.alignment = WD_TABLE_ALIGNMENT.CENTER
         table2.style = 'Table Grid'
         
-        t2_headers = ["Symbol", "G. uralensis Locus", "Functional Group", "6H log2FC", "12H log2FC", "24H log2FC"]
+        # Set explicit column widths to prevent truncation and bad line-wrapping
+        col_widths2 = [Inches(0.9), Inches(1.2), Inches(1.6), Inches(1.1), Inches(1.1), Inches(1.1)]
+        for row in table2.rows:
+            for idx, width in enumerate(col_widths2):
+                row.cells[idx].width = width
+        
+        t2_headers = ["Symbol", "G. uralensis Locus", "Functional Group", "6H log2FC\n(padj)", "12H log2FC\n(padj)", "24H log2FC\n(padj)"]
         t2_hdr_cells = table2.rows[0].cells
         for i, h_text in enumerate(t2_headers):
             t2_hdr_cells[i].text = h_text
             t2_hdr_cells[i].paragraphs[0].runs[0].font.bold = True
             t2_hdr_cells[i].paragraphs[0].runs[0].font.color.rgb = teal_color
+            t2_hdr_cells[i].paragraphs[0].runs[0].font.size = Pt(9.5)
             
         for r_idx, row_data in enumerate(table2_rows):
-            # row_data: [at_id, gwh_id, symbol, group, desc, lfc_6h, padj_6h, lfc_12h, padj_12h, lfc_24h, padj_24h]
             at_id, gwh_id, symbol, group, desc, lfc_6h, padj_6h, lfc_12h, padj_12h, lfc_24h, padj_24h = row_data
             
             row_cells = table2.rows[r_idx + 1].cells
@@ -515,17 +591,22 @@ def main():
             row_cells[2].text = group
             
             # Formatted fold change and padj
-            row_cells[3].text = f"{lfc_6h}\n(p={padj_6h})" if lfc_6h != "N/A" else "N/A"
-            row_cells[4].text = f"{lfc_12h}\n(p={padj_12h})" if lfc_12h != "N/A" else "N/A"
-            row_cells[5].text = f"{lfc_24h}\n(p={padj_24h})" if lfc_24h != "N/A" else "N/A"
+            row_cells[3].text = f"{format_lfc(lfc_6h)}\n({format_padj(padj_6h)})" if lfc_6h != "N/A" else "N/A"
+            row_cells[4].text = f"{format_lfc(lfc_12h)}\n({format_padj(padj_12h)})" if lfc_12h != "N/A" else "N/A"
+            row_cells[5].text = f"{format_lfc(lfc_24h)}\n({format_padj(padj_24h)})" if lfc_24h != "N/A" else "N/A"
             
-            # Format text size inside cells
+            # Format text size inside cells to ensure clean grid rendering
             for cell in row_cells:
                 for p in cell.paragraphs:
+                    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
                     for run in p.runs:
-                        run.font.size = Pt(9.5)
+                        run.font.size = Pt(9.0)
                         
-        doc.add_paragraph("\nTable 2: Expression fold changes (log2FC) and BH-adjusted p-values for representative plant defense genes across the timepoints.")
+        doc.add_paragraph(
+            "\nTable 2: Expression fold changes (log2FC) and BH-adjusted p-values (padj) for representative plant defense genes.\n"
+            "*N/A represents genes filtered out by DESeq2 independent filtering due to extremely low expression levels, "
+            "or genes with missing values due to mapping annotation limitations."
+        )
 
     doc.add_page_break()
     
