@@ -1,0 +1,17 @@
+at_id,gwh_id,symbol,group,desc,lfc_6h,padj_6h,lfc_12h,padj_12h,lfc_24h,padj_24h
+AT2G37040,GUL07G002927,PAL1,Secondary Metabolism,Phenylalanine ammonia-lyase 1,7.17,2.6098e-11,2.41,5.3136e-02,6.46,1.9824e-09
+AT2G30490,GUL06G001053,C4H,Secondary Metabolism,Cinnamate 4-hydroxylase,1.82,4.2506e-12,2.08,1.4261e-15,3.20,3.7814e-36
+AT1G51680,GUL07G000030,4CL1,Secondary Metabolism,4-coumarate-CoA ligase 1,2.11,2.7124e-08,2.42,1.3470e-10,6.02,3.2840e-62
+AT5G13930,GUL06G004396,CHS,Secondary Metabolism,Chalcone synthase,0.34,1.3487e-02,3.07,2.0120e-142,3.09,3.3783e-144
+AT3G55120,GUL02G005484,CHI,Secondary Metabolism,Chalcone isomerase,1.33,2.2634e-11,1.77,1.2922e-19,2.00,6.9497e-25
+AT5G38620,Not Mapped,DFR,Secondary Metabolism,Dihydroflavonol 4-reductase,N/A,N/A,N/A,N/A,N/A,N/A
+AT1G72520,GUL07G004353,LOX4,Jasmonic Acid Pathway,Lipoxygenase 4,0.00,1.0000e+00,7.87,2.7952e-02,0.00,1.0000e+00
+AT5G42650,GUL08G001604,AOS,Jasmonic Acid Pathway,Allene oxide synthase,N/A,N/A,N/A,N/A,N/A,N/A
+AT3G25760,GUL06G002173,AOC1,Jasmonic Acid Pathway,Allene oxide cyclase 1,2.07,6.1442e-04,0.04,9.7232e-01,-0.55,4.3183e-01
+AT2G39940,GUL06G000800,COI1,Jasmonic Acid Pathway,Coronatine-insensitive 1 receptor,1.26,8.6317e-17,0.66,3.2266e-05,0.72,3.5586e-06
+AT1G19180,GUL07G000628,JAZ1,Jasmonic Acid Pathway,Jasmonate-ZIM domain protein 1,-2.39,1.4064e-71,1.13,5.5555e-17,-2.62,1.2217e-85
+AT1G32640,GUL06G003272,MYC2,Jasmonic Acid Pathway,Transcription factor MYC2,0.20,1.8303e-01,1.37,4.9904e-27,1.04,4.3678e-16
+AT1G64280,GUL07G000455,NPR1,Salicylic Acid Pathway,Nonexpressor of PR genes 1,-5.86,N/A,-5.68,N/A,1.27,N/A
+AT2G14610,Not Mapped,PR1,Salicylic Acid Pathway,Pathogenesis-related protein 1,N/A,N/A,N/A,N/A,N/A,N/A
+AT1G73805,GUL08G002584,SARD1,Salicylic Acid Pathway,Systemic acquired resistance deficient 1,-4.56,2.1934e-07,2.28,1.3804e-02,-2.93,1.0377e-03
+AT1G22070,GUL06G001808,TGA3,Salicylic Acid Pathway,Transcription factor TGA3,-0.72,6.6200e-01,-1.24,4.1287e-01,-2.53,6.0033e-02

@@ -1,0 +1,19 @@
+# Ignore large genome assemblies and GenBank files
+reference/*
+!reference/GWH_reference/annotation.gff
+
+# Ignore large intermediate outputs and raw reads
+raw_data/
+trimmed/
+alignments/
+qc/
+qc_trimmed/
+results/gwh_vs_arabidopsis.tsv
+
+# Ignore temp R/IDE files
+.Rhistory
+.RData
+.Rproj.user/
+*.log
+a.out
+
