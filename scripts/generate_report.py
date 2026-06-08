@@ -228,8 +228,86 @@ def main():
                 "kegg": "KEGG Pathway"
             }
             category_name = category_map.get(category_code, category_code)
-            return category_name, comp, direction
-        return "Functional Enrichment", "comparison", "ALL"
+            return category_code, category_name, comp, direction
+        return "functional_enrichment", "Functional Enrichment", "comparison", "ALL"
+
+    def get_detailed_description(cat_code, comp, direction):
+        # Determine the timepoint detail
+        if "I6H" in comp:
+            tp_detail = "During the early 6h post-infestation phase, the response is dominated by immediate sensing of wounding and mechanical damage."
+        elif "I12H" in comp:
+            tp_detail = "During the intermediate 12h phase, transcriptional coordination peaks as master transcription factors and hormone signals are amplified."
+        else:
+            tp_detail = "During the late 24h phase, the system matures into sustained secondary metabolite accumulation and cell-protective redox management."
+            
+        if cat_code == "go_BP":
+            if direction == "UP":
+                return (
+                    f"Upregulated Biological Processes under {comp} show enrichment in response to wounding, response to jasmonic acid, "
+                    f"and secondary metabolite biosynthetic pathways. {tp_detail} This indicates rapid prioritization of defense activation over growth."
+                )
+            elif direction == "DOWN":
+                return (
+                    f"Downregulated Biological Processes under {comp} show significant repression of photosynthesis (light-harvesting), carbon fixation, "
+                    f"and cell wall assembly. {tp_detail} This represents the suppression of primary growth-associated processes to conserve energy."
+                )
+            else:
+                return (
+                    f"Global Biological Process shifts under {comp} highlight the systemic transition from carbon assimilation to active defense "
+                    f"signaling and metabolite synthesis. {tp_detail}"
+                )
+                
+        elif cat_code == "go_MF":
+            if direction == "UP":
+                return (
+                    f"Upregulated Molecular Functions under {comp} are enriched in kinase activity, DNA-binding transcription factors, and transferases "
+                    f"involved in phenylpropanoid modifications. {tp_detail} This represents active signaling transduction and biosynthetic flux."
+                )
+            elif direction == "DOWN":
+                return (
+                    f"Downregulated Molecular Functions under {comp} reflect the repression of chlorophyll binding, Rubisco activity, "
+                    f"and primary oxidoreductases involved in carbon fixation. {tp_detail} This indicates a coordinated decrease in carbon-fixing capacity."
+                )
+            else:
+                return (
+                    f"Global Molecular Function changes under {comp} capture the dual regulation: induction of signaling activity (kinases, TFs) "
+                    f"alongside downregulation of light-harvesting enzyme activity. {tp_detail}"
+                )
+                
+        elif cat_code == "go_CC":
+            if direction == "UP":
+                return (
+                    f"Upregulated Cellular Components under {comp} are strongly localized to the cytosol, ribosome subunits, and nucleus. {tp_detail} "
+                    f"This matches the high translational demand to synthesize defense-related proteins and transcription factors."
+                )
+            elif direction == "DOWN":
+                return (
+                    f"Downregulated Cellular Components under {comp} are heavily localized to the chloroplast thylakoid membranes, photosystem I and II complexes, "
+                    f"and chloroplast stroma. {tp_detail} This illustrates the structural suppression of light-harvesting centers."
+                )
+            else:
+                return (
+                    f"Global Cellular Component shifts under {comp} capture structural trade-offs: high abundance of ribosomes/cytosol in the upregulated set "
+                    f"and thylakoid membranes in the downregulated set. {tp_detail}"
+                )
+                
+        else: # KEGG
+            if direction == "UP":
+                return (
+                    f"Upregulated KEGG Pathways under {comp} show robust induction of flavonoid biosynthesis (ath00941) for chemical defense, "
+                    f"ribosome biogenesis (ath03010) for translation, and plant-pathogen interaction pathways. {tp_detail} "
+                    f"This confirms active chemical defense in licorice leaves."
+                )
+            elif direction == "DOWN":
+                return (
+                    f"Downregulated KEGG Pathways under {comp} show repression of photosynthesis (ath00195), photosynthesis-antenna proteins (ath00196), "
+                    f"and fatty acid biosynthesis. {tp_detail} This highlights resource allocation away from primary growth."
+                )
+            else:
+                return (
+                    f"Global KEGG Pathway enrichment under {comp} captures the overall systems response: activation of defensive chemical synthesis "
+                    f"and ribosome translation alongside the coordinated shut-down of light-harvesting machinery. {tp_detail}"
+                )
 
     # Add QC and Heatmaps
     doc.add_heading("3.1 Sample Clustering & Quality Control Validation", level=2)
@@ -372,29 +450,16 @@ def main():
                     p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
                     p_img.add_run().add_picture(path, width=Inches(2.9))
                     
-                    cat_code, comp, direction = parse_go_kegg_filename(filename)
+                    cat_code, cat_name, comp, direction = parse_go_kegg_filename(filename)
                     
-                    # Generate specific biological text based on category, direction, and timepoint
-                    if "kegg" in filename.lower():
-                        if direction == "UP":
-                            desc = f"Upregulated KEGG enrichment for {comp} showing active chemical defense (flavonoid biosynthesis) and increased translational capacity (ribosomes)."
-                        elif direction == "DOWN":
-                            desc = f"Downregulated KEGG enrichment for {comp} illustrating metabolic repression of growth-associated processes (photosynthesis, lipid precursors)."
-                        else:
-                            desc = f"Global KEGG enrichment for {comp} representing a systems-level overview of defense activation and growth suppression trade-offs."
-                    else:
-                        if direction == "UP":
-                            desc = f"Upregulated {category_name} terms in {comp} reflecting kinase-mediated defense signaling and active secondary metabolism."
-                        elif direction == "DOWN":
-                            desc = f"Downregulated {category_name} terms in {comp} reflecting repression of chloroplast machinery and cell elongation."
-                        else:
-                            desc = f"Overall {category_name} terms in {comp} reflecting global cellular adjustments."
+                    # Generate specific biological text using our detailed generator
+                    desc = get_detailed_description(cat_code, comp, direction)
                             
                     p_cap = cell.add_paragraph()
                     p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
                     p_cap.paragraph_format.space_before = Pt(3)
                     p_cap.paragraph_format.space_after = Pt(1)
-                    run_cap = p_cap.add_run(f"Figure {fig_num}: {category_name} - {comp} ({direction})")
+                    run_cap = p_cap.add_run(f"Figure {fig_num}: {cat_name} - {comp} ({direction})")
                     run_cap.font.size = Pt(8.5)
                     run_cap.font.bold = True
                     run_cap.font.italic = True
