@@ -1,27 +1,27 @@
-# Genome-wide transcriptomic reorganization suggests resource allocation trade-offs and specialized chemical defense modulation in Glycyrrhiza uralensis under herbivore attack
+# Time-course transcriptomic analysis of *Glycyrrhiza uralensis* under insect infestation
 
-**Shiva Raj Chippa**
+**Shiva Raj Chippa**  
 *Bioinformatician | Computational Biology Enthusiast, IISER Tirupati Alumni*
 
-**Plants respond to herbivory through complex networks of signal transduction and metabolic adjustments. Here, we profile the transcriptomic response of the medicinal legume Glycyrrhiza uralensis to chewing insect infestation across a 24-hour timecourse. Using strict homology filtering and statistical criteria, we show that G. uralensis reorganizes its transcriptome to suppress primary light-harvesting processes while activating flavonoid and phenylpropanoid biosynthesis. Our temporal analysis suggests a progressive signaling-to-metabolite response, identifying candidate novel species-specific defense genes and highlighting time-dependent jasmonate signaling dynamics.**
+**This project profiles the transcriptomic response of *Glycyrrhiza uralensis* leaves to chewing insect infestation across a 24-hour time course. Differential expression, best-hit mapping to *Arabidopsis thaliana*, and GO/KEGG over-representation analyses identify candidate genes and functional categories for follow-up. These computational results support hypotheses about defense-associated transcriptional changes; they do not demonstrate pathway activity, metabolite accumulation, or causal resource allocation. Genes without a retained Arabidopsis match are described as unmapped in this analysis, not as confirmed novel or species-specific genes.**
 
-## Global transcriptional dynamics and replicate validation
+## Global transcriptional patterns
 
-To understand G. uralensis transcriptional defense networks, we performed RNA-seq on leaves harvested at 0h, 6h, 12h, and 24h post-infestation. Principal Component Analysis (PCA) of VST-normalized counts revealed that biological replicates cluster tightly, indicating minimal technical variance. PC1 captures 56% of total variance and separates early stages (0-6h) from later responses (12-24h). Hierarchical distance heatmaps confirmed these groupings, showing that the transcriptome undergoes progressive, coordinated remodeling in response to insect chewing.
+RNA-seq samples were collected at 0, 6, 12, and 24 hours after infestation. PCA of variance-stabilized counts shows PC1 accounting for 56% of the variance and separates the 0–6 hour samples from the 12–24 hour samples in the plotted data. The sample-distance heatmap shows a similar pattern. These plots describe overall expression-space similarities; replicate proximity does not quantify technical variance or independently establish experimental reproducibility, and the plotted separation alone does not identify its biological cause.
 
-## Homology filtering isolates novel legume-specific candidates
+## Arabidopsis best-hit mapping
 
-To map GWH annotations to the model Arabidopsis thaliana proteome, we ran DIAMOND blastp. To prevent annotation over-claiming, homologs were filtered strictly: E-value <= 1e-5, identity >= 30%, and single best-hit selection based on bitscore. This logic resolved 25,121 high-confidence ortholog mappings (63.6% of GWH genes). Umapped DEGs represent candidate novel or lineage-specific genes: we identified 1,177 novel DEGs at 6h (13.64%), 1,015 at 12h (12.98%), and 1,309 at 24h (13.33%). These candidate novel genes represent a rich genomic resource for specialized defense features in Glycyrrhiza.
+Licorice protein sequences were compared with the Arabidopsis proteome using DIAMOND blastp. The reported filtering used an E-value threshold of ≤ 1e-5, identity ≥ 30%, and retained the single highest-bitscore hit for each query. The project reports 25,121 retained best-hit associations (63.6% of GWH genes). A single best hit does not establish reciprocal or one-to-one orthology, so these are described as homology-based mappings rather than confirmed orthologs.
 
-## Functional enrichment highlights growth-defense trade-offs
+For the 6, 12, and 24 hour contrasts, the project reports 1,177, 1,015, and 1,309 DEGs, respectively, without a retained Arabidopsis mapping. “Unmapped” refers to this analysis and its thresholds. It does not establish that a gene is novel, lineage-specific, or involved in defense; lack of a match can also reflect sequence divergence, database representation, or filtering.
 
-Over-representation analysis (ORA) using clusterProfiler (BH-adjusted padj < 0.05, qvalue < 0.05) separate upregulated and downregulated processes. Upregulated biological processes show robust induction of flavonoid biosynthesis (ath00941) and ribosome translation (ath03010) across all timepoints, driving chemical defense mechanisms. Downregulated pathways are enriched in photosynthesis thylakoid membrane proteins (ath00196) and light-harvesting antenna centers, suggesting suppression of photosynthesis to conserve energy resources (growth-defense trade-offs).
+## Functional enrichment and pathway interpretation
 
-## Time-dependent modulation of jasmonic and salicylic acid signaling
+The project reports GO and KEGG over-representation results for up- and down-regulated mapped gene sets. Reported categories include flavonoid biosynthesis (ath00941), ribosome (ath03010), photosynthesis-related pathways (ath00195 and ath00196), and alpha-linolenic acid metabolism (ath00592). These are enrichment associations among the analyzed Arabidopsis-mapped IDs. They do not by themselves show pathway activation or suppression, metabolite production, hormone activity, or an energy-allocation trade-off. The enrichment script does not specify a custom background universe, which is an additional limitation when interpreting the reported categories.
 
-We observed time-dependent modulation of JA signaling components rather than simple pathway activation. Putative homologs of lipoxygenases (LOX4) and allene oxide cyclase (AOC1) were differentially regulated. Putative master transcription factor MYC2 showed a delayed induction, remaining non-significant early (6h, padj = 0.18) but showing strong upregulation later (12h, 24h). Conversely, repressor JAZ1 homologs exhibited dynamic regulatory behavior (downregulated at 6h, upregulated at 12h, and downregulated at 24h). Salicylic acid (SA) homologs (SARD1, TGA3) showed limited evidence of SA-associated transcriptional modulation under chewing stress, while PR1 was unmapped and NPR1 was filtered due to low counts.
+## Candidate hormone and secondary-metabolism genes
 
-Upregulation of genes associated with secondary metabolism (PAL1, C4H, 4CL1, CHS, CHI) suggests potential accumulation of protective flavonoids (liquiritin/liquiritigenin precursors), although metabolite concentrations were not directly measured.
+The following table reproduces the project’s reported expression estimates for selected candidate genes. Gene names and pathway labels refer to Arabidopsis best-hit annotations and should be interpreted as putative functional associations in licorice. The values are not direct measurements of protein activity, hormone levels, or metabolites. Reported differential expression of these candidates can motivate targeted follow-up, but does not establish the corresponding pathway’s activity.
 
 Table 1: Expression fold changes (log2FC) and BH-adjusted p-values (padj) for key representative plant defense genes.
 
@@ -44,8 +44,10 @@ Table 1: Expression fold changes (log2FC) and BH-adjusted p-values (padj) for ke
 | **SARD1** | GUL08G002584 | Salicylic Acid Pathway | -4.56<br>(2.19e-07) | +2.28<br>(1.38e-02) | -2.93<br>(1.04e-03) |
 | **TGA3** | GUL06G001808 | Salicylic Acid Pathway | -0.72<br>(6.62e-01) | -1.24<br>(4.13e-01) | -2.53<br>(6.00e-02) |
 
-**N/A represents genes filtered out by DESeq2 independent filtering or genes with missing values due to mapping annotation limitations.*
+**N/A indicates that a value or mapping was unavailable in the reported table; the cause depends on the entry and is not necessarily attributable to annotation mapping or DESeq2 filtering alone.**
 
-## Progressive transcriptomic response model
+The table shows time-dependent expression estimates for genes annotated as JA- or SA-associated in Arabidopsis. For example, the reported MYC2 estimates are positive at 12 and 24 hours, while JAZ1 estimates change direction across time points. Such patterns are candidate transcriptional observations, not direct evidence of hormone signaling activity. Likewise, expression estimates for PAL1, C4H, 4CL1, CHS, and CHI do not demonstrate accumulation of flavonoids such as liquiritin or liquiritigenin; metabolite concentrations were not measured here.
 
-In summary, our temporal transcriptomics suggest a progressive response cascade. Early insect chewing is associated with cell-wall wounding, triggering Ca2+ and MAPK signaling cascades at 6h. This signaling coincides with a time-dependent phytohormone modulation (JA pathway) at 12h, allowing transcription factor activation (such as MYC2 and WRKYs). By 24h, this transcription program contributes to downstream defenses, including upregulated flavonoid synthesis and redox homeostasis enzymes (SOD, GSTs), while growth-associated photosynthesis genes are repressed.
+## Proposed response model
+
+The project’s proposed model links early wound signaling, later hormone-associated transcription, candidate transcription factors, and secondary-metabolism genes. These links are hypotheses based on the expression and annotation analyses. This study did not directly measure calcium or MAPK signaling, hormone concentrations, photosynthetic rates, growth costs, or defense metabolites, so the proposed sequence and resource-allocation interpretation require independent experimental validation.
